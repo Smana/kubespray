@@ -13,7 +13,7 @@ services:
 
         host: 127.0.0.1
         username: root
-        password: {{ stack_password }}
+        password: {{ romana_db_password }}
         database: ipam
   - service: tenant
     api:
@@ -24,7 +24,7 @@ services:
         type: mysql
         host: 127.0.0.1
         username: root
-        password: {{ stack_password }}
+        password: {{ romana_db_password }}
         database: tenant
   - service: topology
     api:
@@ -35,7 +35,7 @@ services:
         type: mysql
         host: 127.0.0.1
         username: root
-        password: {{ stack_password }}
+        password: {{ romana_db_password }}
         database: topology
       datacenter: 
         ip_version: 4

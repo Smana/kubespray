@@ -23,16 +23,25 @@
   notify: restart docker
   when: ansible_service_mgr == "systemd" and ansible_os_family != "CoreOS"
 
+- name: Check for nsenter
+  stat: path="/usr/bin/nsenter"
+  register: ns
+
+- name: Install nsenter
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-nsenter" "{{ bin_dir }}/nsenter"
+  when: not ns.stat.exists
+
 - name: Install romana cni bin
-  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana" "/opt/cni/bin/romana"
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-cni" "/opt/cni/bin/romana"
   changed_when: false
 
-- name: Install romana agent binaries
-  command: rsync -piu "{{ local_release_dir }}/romana/bin/{{item}}"  "{{ kube_bin_dir }}/{{item}}"
+- name: Install romana agent binary
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-agent"  "{{ bin_dir }}/agent"
   changed_when: false
-  with_items:
-    - agent
-    - romana-kube-agent
+
+- name: Install romana-kube-agent binary
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-kube-agent"  "{{ bin_dir }}/romana-kube-agent"
+  changed_when: false
 
 - name: Install romana-agent systemd unit
   template:
@@ -47,3 +56,18 @@
     dest: "/usr/lib/systemd/system/romana-kube-agent.service"
   notify: restart romana-kube-agent
   when: ansible_service_mgr == "systemd"
+
+- name: Install romana-agent upstart service
+  template:
+    src: "upstart/romana-agent.conf"
+    dest: "/etc/init/romana-agent.conf"
+  notify: restart romana-agent
+  when: ansible_service_mgr == "upstart"
+
+- name: Install romana-kube-agent upstart service
+  template:
+    src: "upstart/romana-kube-agent.conf"
+    dest: "/etc/init/romana-kube-agent.conf"
+  notify: restart romana-kube-agent
+  when: ansible_service_mgr == "upstart"
+

@@ -1,2 +1,14 @@
 ---
+# Path for config file(s) shared by Romana services
 romana_etc_dir: "/etc/romana"
+# IP Address of master node
+romana_master_ip: "{{ hostvars[groups['kube-master'][0]]['access_ip'] | default(hostvars[groups['kube-master'][0]]['ip'] | default(hostvars[groups['kube-master'][0]]['ansible_default_ipv4']['address'])) }}"
+
+# Global CIDR that romana uses for allocating addresses
+romana_cidr: "10.0.0.0/8"
+
+# Gateway address assigned to each node
+romana_gw: "{{ romana_cidr | ipsubnet(16, groups['kube-node'].index(inventory_hostname)) | ipaddr(1) }}"
+
+# Password to use for the database
+romana_db_password: "romana"

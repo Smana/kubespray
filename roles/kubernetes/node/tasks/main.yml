@@ -36,3 +36,15 @@
     name: kubelet
     enabled: yes
     state: started
+
+- name: Configure kubectl
+  command: "{{ item }}"
+  with_items:
+    - kubectl config set-cluster kargo-cluster --server="https://{{ hostvars[groups['kube-master'][0]]['access_ip'] | default(hostvars[groups['kube-master'][0]]['ip'] | default(hostvars[groups['kube-master'][0]]['ansible_default_ipv4']['address'])) }}:{{ kube_apiserver_port }}"
+    - kubectl config set-cluster kargo-cluster --certificate-authority="{{ kube_cert_dir }}/ca.pem"
+    - kubectl config set-credentials kargo-admin --client-certificate="{{ kube_cert_dir }}/node.pem"
+    - kubectl config set-credentials kargo-admin --client-key="{{ kube_cert_dir }}/node-key.pem"
+    - kubectl config set-credentials kargo-admin --token="{{ lookup('file', '../secrets/files/tokens/system:kubectl-' + inventory_hostname + '.token') }}"
+    - kubectl config set-context kargo-context --cluster=kargo-cluster --user=kargo-admin
+    - kubectl config use-context kargo-context
+

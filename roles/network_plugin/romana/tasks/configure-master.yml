@@ -1,8 +1,21 @@
 ---
+- name: Ensure romana-root is running
+  service:
+    name: romana-root
+    state: started
+
+- name: Initialize databases for romana microservices
+  shell: "{{ bin_dir }}/{{ item }} -overwriteSchema -rootURL http://{{ romana_master_ip }}:9600"
+  failed_when: false
+  with_items:
+    - topology
+    - tenant
+    - ipam
+
 - name: Configure IP address for Network Policy service
   replace:
-    dest: "/usr/local/lib/romana-kube-np"
-    regexp: "192\.168\.0\.10"
+    dest: "{{ bin_dir }}/romana-kube-np"
+    regexp: "192\\.168\\.0\\.10"
     replace: "{{ romana_master_ip }}"
 
 - name: Install romana post-install script
@@ -13,3 +26,13 @@
         
 - name: Execute romana post-install script
   shell: /var/tmp/romana-post-install.sh
+
+- name: Start remaining services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - romana-topology
+    - romana-tenant
+    - romana-ipam
+    - romana-kube-np

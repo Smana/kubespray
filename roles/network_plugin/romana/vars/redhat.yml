@@ -4,8 +4,5 @@ romana_master_pkgs:
   - python-requests
 
 romana_node_pkgs:
-  - dnsmasq-base
-  - libnettle4
-  - libhogweed2
   - python-simplejson
   - jq

@@ -15,24 +15,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-if [[ -f $HOME/.profile ]]; then
-	source "$HOME/.profile"
-fi
-
 # Suppress output
 exec > /dev/null
 
-# This script currently directly uses the REST API of the Romana Topology and Tenant services
-# to configure the hosts/owners/tiers used in a simple setup.
-
 # Create hosts
-{% for n in groups.stack_nodes %}
-romana host add {{ hostvars[n].ansible_hostname }} {{ hostvars[n].lan_ip }} {{ hostvars[n].romana_gw }} 9604
+{% for n in groups['kube-node'] %}
+romana host add {{ hostvars[n].inventory_hostname }} {{ hostvars[n].ansible_default_ipv4['address'] }} {{ romana_cidr | ipsubnet(16, groups['kube-node'].index(n)) | ipaddr(1) }} 9604
 {% endfor %}
 
-# Create owners and tiers
+# Create some initial tenants and segments
 romana tenant create default
 romana segment add default default
+romana tenant create kube-system
+romana segment add kube-system default
 romana tenant create tenant-a
 romana segment add tenant-a default
 romana segment add tenant-a backend

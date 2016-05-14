@@ -18,3 +18,9 @@
   command: rsync -piu "{{ local_release_dir }}/kubernetes/bin/kubelet" "{{ bin_dir }}/kubelet"
   register: kubelet_copy
   changed_when: false
+
+- name: Install kubectl
+  command: rsync -piu "{{ local_release_dir }}/kubernetes/bin/kubectl" "{{ bin_dir }}/kubectl"
+  changed_when: false
+  when: kube_network_plugin == "romana"
+

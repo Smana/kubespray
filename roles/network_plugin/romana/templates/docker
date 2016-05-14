@@ -1,2 +1,2 @@
 # Deployed by Ansible
-DOCKER_OPTS="-H fd:// --bip={{ docker_cidr }}"
+DOCKER_OPTS="-H fd:// --bip=127.254.254.1/24"

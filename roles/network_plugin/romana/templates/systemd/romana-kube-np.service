@@ -6,7 +6,7 @@ Wants=romana-topology.service
 
 [Service]
 #User=...
-ExecStart=/usr/bin/python /usr/local/lib/romana-kube-np
+ExecStart=/usr/bin/python {{ bin_dir }}/romana-kube-np
 Restart=on-failure
 LimitNOFILE=65536
 

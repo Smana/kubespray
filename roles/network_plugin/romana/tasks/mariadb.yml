@@ -1,12 +1,19 @@
 ---
 - name: Set mysql password
-  command: mysqladmin password "{{ stack_password }}"
+  command: mysqladmin password "{{ romana_db_password }}"
 
 - name: Install my.cnf
-  template: src="mysql/my.cnf" dest="~/.my.cnf" mode=0600
+  template: src="my.cnf" dest="~/.my.cnf" mode=0600
   notify: restart mariadb
 
 - name: Make sure DB has started
   service:
     name: mariadb
     state: started
+  when: ansible_os_family == "RedHat"
+
+- name: Make sure DB has started
+  service:
+    name: mysql
+    state: started
+  when: ansible_os_family == "Debian"

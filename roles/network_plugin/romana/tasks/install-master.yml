@@ -1,6 +1,23 @@
 ---
-- name: Install romana binaries
-  command: rsync -piu "{{ local_release_dir }}/romana/bin/{{item}}" "{{ kube_bin_dir }}/{{item}}"
+- name: Create romana etc directory
+  file: path="{{ romana_etc_dir }}" state="directory"
+
+- name: Install config for romana-root service
+  template:
+    src: "romana.conf.yml"
+    dest: "{{ romana_etc_dir }}/romana.conf.yml"
+
+- name: Install romana command-line tool
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana" "{{ bin_dir }}/romana"
+  changed_when: false
+
+- name: Install config for romana command-line tool
+  template:
+    src: "romana.yaml"
+    dest: "~/.romana.yaml"
+
+- name: Install romana microservice binaries
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-{{item}}" "{{ bin_dir }}/{{item}}"
   changed_when: false
   with_items:
     - topology
@@ -9,7 +26,7 @@
     - tenant
 
 - name: install romana network policy script
-  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-kube-agent" "{{ kube_bin_dir }}/romana-kube-np"
+  command: rsync -piu "{{ local_release_dir }}/romana/bin/romana-kube-np" "{{ bin_dir }}/romana-kube-np"
   changed_when: false
 
 - name: Install packages requirements on Romana master
@@ -18,13 +35,6 @@
     name: "{{ item }}"
     state: latest
   with_items: "{{romana_master_pkgs | default([])}}" 
-
-- name: Install romana-topology systemd unit
-  template:
-    src: "systemd/romana-topology.service"
-    dest: "/usr/lib/systemd/system/romana-topology.service"
-  notify: restart romana-topology
-  when: ansible_service_mgr == "systemd"
 
 - name: Install romana-root systemd unit
   template:
@@ -53,3 +63,45 @@
     dest: "/usr/lib/systemd/system/romana-topology.service"
   notify: restart romana-topology
   when: ansible_service_mgr == "systemd"
+
+- name: Install romana-kube-np systemd unit
+  template:
+    src: "systemd/romana-kube-np.service"
+    dest: "/usr/lib/systemd/system/romana-kube-np.service"
+  notify: restart romana-kube-np
+  when: ansible_service_mgr == "systemd"
+
+- name: Install romana-root upstart service
+  template:
+    src: "upstart/romana-root.conf"
+    dest: "/etc/init/romana-root.conf"
+  notify: restart romana-root
+  when: ansible_service_mgr == "upstart"
+
+- name: Install romana-ipam upstart service
+  template:
+    src: "upstart/romana-ipam.conf"
+    dest: "/etc/init/romana-ipam.conf"
+  notify: restart romana-ipam
+  when: ansible_service_mgr == "upstart"
+
+- name: Install romana-tenant upstart service
+  template:
+    src: "upstart/romana-tenant.conf"
+    dest: "/etc/init/romana-tenant.conf"
+  notify: restart romana-tenant
+  when: ansible_service_mgr == "upstart"
+
+- name: Install romana-topology upstart service
+  template:
+    src: "upstart/romana-topology.conf"
+    dest: "/etc/init/romana-topology.conf"
+  notify: restart romana-topology
+  when: ansible_service_mgr == "upstart"
+
+- name: Install romana-kube-np upstart service
+  template:
+    src: "upstart/romana-kube-np.conf"
+    dest: "/etc/init/romana-kube-np.conf"
+  notify: restart romana-kube-np
+  when: ansible_service_mgr == "upstart"

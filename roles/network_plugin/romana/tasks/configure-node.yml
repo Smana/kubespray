@@ -6,8 +6,8 @@
 
 - name: Configure IP address for agent
   replace:
-    dest: "/usr/local/lib/romana-kube-agent"
-    regexp: "192\.168\.0\.10"
+    dest: "{{ bin_dir }}/romana-kube-agent"
+    regexp: "192\\.168\\.0\\.10"
     replace: "{{ romana_master_ip }}"
 
 # Check if the romana-gw already exists
@@ -40,7 +40,10 @@
     - net.ipv4.conf.default.proxy_arp
     - net.ipv4.conf.all.proxy_arp
 
-- name: Ensure romana-agent is running
+- name: Ensure romana-agent and romana-kube-agent are running
   service:
-    name: romana-agent
+    name: "{{ item }}"
     state: started
+  with_items:
+    - romana-agent
+    - romana-kube-agent
