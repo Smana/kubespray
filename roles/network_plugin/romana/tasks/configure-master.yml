@@ -24,9 +24,6 @@
     dest: "/var/tmp/romana-post-install.sh"
     mode: 0755
         
-- name: Execute romana post-install script
-  shell: /var/tmp/romana-post-install.sh
-
 - name: Start remaining services
   service:
     name: "{{ item }}"
@@ -36,3 +33,6 @@
     - romana-tenant
     - romana-ipam
     - romana-kube-np
+
+- name: Execute romana post-install script
+  shell: /var/tmp/romana-post-install.sh

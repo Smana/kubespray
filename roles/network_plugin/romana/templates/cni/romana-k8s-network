@@ -2,7 +2,7 @@
   "name": "romana-k8s-network",
   "type": "romana",
   "kube_master_ip": "{{ romana_master_ip }}",
-  "kubectl_args": "--v=0",
+  "kubectl_args": "--kubeconfig=/root/.kube/config",
   "ipam": {
       "type": "romana-ipam"
   }

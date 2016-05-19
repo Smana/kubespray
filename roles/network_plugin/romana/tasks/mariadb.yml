@@ -17,3 +17,9 @@
     name: mysql
     state: started
   when: ansible_os_family == "Debian"
+
+- name: Add romana user
+  mysql_user:
+    name: romana
+    password: "{{ romana_db_password }}"
+    priv: "*.*:ALL"

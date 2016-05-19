@@ -39,35 +39,35 @@
 - name: Install romana-root systemd unit
   template:
     src: "systemd/romana-root.service"
-    dest: "/usr/lib/systemd/system/romana-root.service"
+    dest: "/etc/systemd/system/romana-root.service"
   notify: restart romana-root
   when: ansible_service_mgr == "systemd"
 
 - name: Install romana-ipam systemd unit
   template:
     src: "systemd/romana-ipam.service"
-    dest: "/usr/lib/systemd/system/romana-ipam.service"
+    dest: "/etc/systemd/system/romana-ipam.service"
   notify: restart romana-ipam
   when: ansible_service_mgr == "systemd"
 
 - name: Install romana-tenant systemd unit
   template:
     src: "systemd/romana-tenant.service"
-    dest: "/usr/lib/systemd/system/romana-tenant.service"
+    dest: "/etc/systemd/system/romana-tenant.service"
   notify: restart romana-tenant
   when: ansible_service_mgr == "systemd"
 
 - name: Install romana-topology systemd unit
   template:
     src: "systemd/romana-topology.service"
-    dest: "/usr/lib/systemd/system/romana-topology.service"
+    dest: "/etc/systemd/system/romana-topology.service"
   notify: restart romana-topology
   when: ansible_service_mgr == "systemd"
 
 - name: Install romana-kube-np systemd unit
   template:
     src: "systemd/romana-kube-np.service"
-    dest: "/usr/lib/systemd/system/romana-kube-np.service"
+    dest: "/etc/systemd/system/romana-kube-np.service"
   notify: restart romana-kube-np
   when: ansible_service_mgr == "systemd"
 

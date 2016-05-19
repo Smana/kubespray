@@ -46,14 +46,14 @@
 - name: Install romana-agent systemd unit
   template:
     src: "systemd/romana-agent.service"
-    dest: "/usr/lib/systemd/system/romana-agent.service"
+    dest: "/etc/systemd/system/romana-agent.service"
   notify: restart romana-agent
   when: ansible_service_mgr == "systemd"
 
 - name: Install romana-kube-agent systemd unit
   template:
     src: "systemd/romana-kube-agent.service"
-    dest: "/usr/lib/systemd/system/romana-kube-agent.service"
+    dest: "/etc/systemd/system/romana-kube-agent.service"
   notify: restart romana-kube-agent
   when: ansible_service_mgr == "systemd"
 

@@ -10,9 +10,8 @@ services:
     config:
       store: 
         type: mysql
-
         host: 127.0.0.1
-        username: root
+        username: romana
         password: {{ romana_db_password }}
         database: ipam
   - service: tenant
@@ -23,7 +22,7 @@ services:
       store: 
         type: mysql
         host: 127.0.0.1
-        username: root
+        username: romana
         password: {{ romana_db_password }}
         database: tenant
   - service: topology
@@ -34,7 +33,7 @@ services:
       store: 
         type: mysql
         host: 127.0.0.1
-        username: root
+        username: romana
         password: {{ romana_db_password }}
         database: topology
       datacenter: 

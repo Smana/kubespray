@@ -5,7 +5,7 @@ romana_etc_dir: "/etc/romana"
 romana_master_ip: "{{ hostvars[groups['kube-master'][0]]['access_ip'] | default(hostvars[groups['kube-master'][0]]['ip'] | default(hostvars[groups['kube-master'][0]]['ansible_default_ipv4']['address'])) }}"
 
 # Global CIDR that romana uses for allocating addresses
-romana_cidr: "10.0.0.0/8"
+romana_cidr: "10.0.0.0/9"
 
 # Gateway address assigned to each node
 romana_gw: "{{ romana_cidr | ipsubnet(16, groups['kube-node'].index(inventory_hostname)) | ipaddr(1) }}"
