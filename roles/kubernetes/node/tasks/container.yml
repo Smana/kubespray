@@ -1,0 +1,55 @@
+---
+- name: Install python-pip
+  action:
+    module: "{{ ansible_pkg_mgr }}"
+    name: "python-setuptools"
+    state: latest
+  when: ansible_os_family != "CoreOS"
+
+- name: Install docker-py
+  command: easy_install docker-py
+  changed_when: false
+
+- name: Run kubelet docker container
+  docker:
+    net: host
+    privileged: true
+    name: kubelet
+    image: "{{ hyperkube_image_repo }}:{{ hyperkube_image_tag }}"
+    volumes:
+      - "/:/rootfs:ro"
+      - "/sys:/sys:ro"
+      - "/etc/cni:/etc/cni:ro"
+      - "/opt/cni:/opt/cni:ro"
+      - "/var/lib/docker/:/var/lib/docker:rw"
+      - "/var/run:/var/run:rw"
+      - "/var/lib/kubelet:/var/lib/kubelet:rw"
+      - "{{ kube_config_dir }}:{{ kube_config_dir }}:rw"
+    command: >-
+      /hyperkube kubelet
+      --logtostderr=true
+      --v={{ kube_log_lvel | default('2') }}
+      --allow_privileged=true
+      {% if inventory_hostname in groups['kube-node'] %}
+      --api_servers={% for host in groups['kube-master'] %}https://{{ hostvars[host]['access_ip'] | default(hostvars[host]['ip'] | default(hostvars[host]['ansible_default_ipv4']['address'])) }}:{{ kube_apiserver_port }}{% if not loop.last %},{% endif %}{% endfor %}
+      {% endif %}
+      --address=0.0.0.0
+      --hostname_override={{ inventory_hostname }}
+      {% if inventory_hostname in groups['kube-master'] and inventory_hostname not in groups['kube-node'] %}
+      --register-node=false
+      {% endif %}
+      {% if dns_setup %}
+      --cluster_dns={{ dns_server }} --cluster_domain={{ dns_domain }} --kubeconfig={{ kube_config_dir}}/node-kubeconfig.yaml --config={{ kube_manifest_dir }}
+      {% else %}
+      --kubeconfig={{ kube_config_dir}}/kubelet.kubeconfig --config={{ kube_manifest_dir }}
+      {% endif %}
+      {% if kube_network_plugin is defined and kube_network_plugin in ["calico", "weave"] %}
+      --network_plugin=cni --network-plugin-dir=/etc/cni/net.d
+      {% elif kube_network_plugin is defined and kube_network_plugin == "weave" %}
+      --docker-endpoint=unix:/var/run/weave/weave.sock
+      {% endif %}
+      {% if cloud_provider is defined and cloud_provider == "openstack" %}
+      --cloud-provider={{ cloud_provider }} --cloud-config={{ kube_config_dir }}/cloud_config
+      {% else %}
+      --cloud_provider={{ cloud_provider }}
+      {% endif %}

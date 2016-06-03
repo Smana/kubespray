@@ -6,7 +6,6 @@ KUBE_LOGGING="--log-dir={{ kube_log_dir }} --logtostderr=true"
 KUBE_LOGGING="--logtostderr=true"
 {% endif %}
 KUBE_LOG_LEVEL="--v={{ kube_log_level | default('2') }}"
-KUBE_ALLOW_PRIV="--allow_privileged=true"
 {% if inventory_hostname in groups['kube-node'] %}
 KUBELET_API_SERVER="--api_servers={% for host in groups['kube-master'] %}https://{{ hostvars[host]['access_ip'] | default(hostvars[host]['ip'] | default(hostvars[host]['ansible_default_ipv4']['address'])) }}:{{ kube_apiserver_port }}{% if not loop.last %},{% endif %}{% endfor %}"
 {% endif %}
@@ -35,8 +34,7 @@ KUBE_ALLOW_PRIV="--allow_privileged=true"
 {% if cloud_provider is defined and cloud_provider == "openstack" %}
 KUBELET_CLOUDPROVIDER="--cloud-provider={{ cloud_provider }} --cloud-config={{ kube_config_dir }}/cloud_config"
 {% else %}
-{# TODO: gce and aws don't need the cloud provider to be set? #}
-KUBELET_CLOUDPROVIDER=""
+KUBELET_CLOUDPROVIDER="--cloud-provider={{ cloud_provider }}"
 {% endif %}
 {% if ansible_service_mgr in ["sysvinit","upstart"] %}
 DAEMON_ARGS="$KUBE_LOGGING $KUBE_LOG_LEVEL $KUBE_ALLOW_PRIV $KUBELET_API_SERVER $KUBELET_ADDRESS \

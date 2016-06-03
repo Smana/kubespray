@@ -1,0 +1,51 @@
+---
+- name: Write kubelet systemd init file
+  template:
+    src: kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+    backup: yes
+  when: ansible_service_mgr == "systemd"
+  notify: restart kubelet
+
+- name: Write kubelet initd script
+  template:
+    src: deb-kubelet.initd.j2
+    dest: /etc/init.d/kubelet
+    owner: root
+    mode: 0755
+    backup: yes
+  when: ansible_service_mgr in ["sysvinit","upstart"] and ansible_os_family == "Debian"
+  notify: restart kubelet
+
+- name: Write kubelet initd script
+  template:
+    src: rh-kubelet.initd.j2
+    dest: /etc/init.d/kubelet
+    owner: root
+    mode: 0755
+    backup: yes
+  when: ansible_service_mgr in ["sysvinit","upstart"] and ansible_os_family == "RedHat"
+  notify: restart kubelet
+
+- name: Install kubelet binary
+  command: rsync -piu "{{ local_release_dir }}/kubernetes/bin/kubelet" "{{ bin_dir }}/kubelet"
+  register: kubelet_copy
+  changed_when: false
+
+- name: Write kubelet config file
+  template: src=kubelet.j2 dest={{ kube_config_dir }}/kubelet.env backup=yes
+  notify:
+    - restart kubelet
+
+- name: Restart kubelet if binary changed
+  command: /bin/true
+  notify: restart kubelet
+  when: kubelet_copy.stdout_lines
+
+- meta: flush_handlers
+
+- name: Enable kubelet
+  service:
+    name: kubelet
+    enabled: yes
+    state: started
