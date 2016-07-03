@@ -29,6 +29,9 @@ kube_users:
 # Kubernetes cluster name, also will be used as DNS domain
 cluster_name: cluster.local
 
+# Choose the container engine (docker or rkt)
+kube_container_engine: docker
+
 # For some environments, each node has a pubilcally accessible
 # address and an address it should bind services to.  These are
 # really inventory level variables, but described here for consistency.

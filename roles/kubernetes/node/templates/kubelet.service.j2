@@ -21,7 +21,8 @@ ExecStart={{ bin_dir }}/kubelet \
 		$DOCKER_SOCKET \
 		$KUBELET_REGISTER_NODE \
 		$KUBELET_NETWORK_PLUGIN \
-		$KUBELET_CLOUDPROVIDER
+		$KUBELET_CLOUDPROVIDER \
+		$RKT_OPTS
 Restart=on-failure
 
 [Install]

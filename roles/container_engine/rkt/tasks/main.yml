@@ -1,0 +1,5 @@
+---
+- name: rkt | Copy rkt binary
+  command: rsync -piu "{{ rkt_bin_dir }}/rkt" "{{ bin_dir }}/rkt"
+  register: rkt_copy
+  changed_when: false
